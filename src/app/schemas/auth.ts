@@ -8,11 +8,11 @@ export const signUpSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z
     .string()
-    .min(6, "Password must be at least  6 charaters")
+    .min(8, "Password must be at least  6 charaters")
     .max(30, "Password must be smaller than  30 charaters"),
 });
 
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least  6 charaters").max(30),
+  password: z.string().min(8, "Password must be at least  6 charaters").max(30),
 });
