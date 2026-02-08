@@ -17,11 +17,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 export default function LoginPage() {
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const form = useForm({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,18 +36,20 @@ export default function LoginPage() {
   });
 
   async function onSubmit(data: z.infer<typeof loginSchema>) {
-    await authClient.signIn.email({
-      email: data.email,
-      password: data.password,
-      fetchOptions: {
-        onSuccess: () => {
-          toast.success("Logged in successfully");
-          router.push("/");
+    startTransition(async () => {
+      await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success("Logged in successfully");
+            router.push("/");
+          },
+          onError: (error) => {
+            toast.error(error.error.message);
+          },
         },
-        onError: (error) => {
-          toast.error(error.error.message);
-        },
-      },
+      });
     });
   }
 
@@ -92,7 +97,16 @@ export default function LoginPage() {
                 </Field>
               )}
             />
-            <Button>Login</Button>
+            <Button disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  <span>Loading...</span>
+                </>
+              ) : (
+                <span>Log in</span>
+              )}
+            </Button>
           </FieldGroup>
         </form>
       </CardContent>
