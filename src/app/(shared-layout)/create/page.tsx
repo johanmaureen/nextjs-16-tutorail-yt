@@ -17,19 +17,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
-import { api } from "../../../../convex/_generated/api";
 import { useTransition } from "react";
+
 import { toast } from "sonner";
+import { createBlogAction } from "@/app/actions";
 import { useRouter } from "next/navigation";
 
 export default function CreateRoute() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const mutation = useMutation(api.post.createPost);
   const form = useForm({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(postSchema as any),
@@ -40,11 +39,8 @@ export default function CreateRoute() {
   });
 
   function onSubmit(values: z.infer<typeof postSchema>) {
-    startTransition(() => {
-      mutation({
-        body: values.content,
-        title: values.title,
-      });
+    startTransition(async () => {
+      await createBlogAction(values);
       toast.success("Everthing was fine");
       router.push("/");
     });
